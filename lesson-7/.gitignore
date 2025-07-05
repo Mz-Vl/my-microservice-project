@@ -1,0 +1,4 @@
+lesson-7/awscliv2.zip
+lesson-7/.terraform/
+*.zip
+.terraform/

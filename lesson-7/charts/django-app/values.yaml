@@ -1,0 +1,30 @@
+replicaCount: 2
+
+image:
+  repository: 655840553229.dkr.ecr.eu-central-1.amazonaws.com/lesson-5-ecr
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+env:
+  DJANGO_SETTINGS_MODULE: app.settings
+  DEBUG: "False"
+  ALLOWED_HOSTS: "[\"k8s-default-djangoap-c0cbdff1ed-170475447.eu-central-1.elb.amazonaws.com\"]"
+
+
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+
+autoscaling:
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
