@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+.env
+*.env
+*.log
+
+# Django specific
+db.sqlite3
+*.pyc
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+terraform.tfvars
+
+# Kubernetes
+k8s-secret.yaml
+*.kubeconfig
+
+# Helm
+charts/**/values.yaml.backup
+charts/**/values.override.yaml
+charts/**/.DS_Store
+
+# Docker
+*.tar
+*.img
+docker-compose.override.yml
+
+# System files
+.DS_Store
+Thumbs.db
+
+# AWS Credentials (на всякий випадок)
+~/.aws/credentials
+
+# Secrets
+secrets.yaml
+secrets.json
+*.pem
+*.key
+*.crt
+
+# Cache / temp
+*.swp
+*.bak
+*.tmp

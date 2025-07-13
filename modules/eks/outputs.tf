@@ -9,3 +9,7 @@ output "endpoint" {
 output "kubeconfig_certificate_authority_data" {
   value = aws_eks_cluster.this.certificate_authority[0].data
 }
+
+output "ebs_csi_driver_role" {
+  value = aws_iam_role.ebs_csi_driver_role.arn
+}

@@ -1,8 +1,11 @@
-module "s3_backend" {
-  source      = "./modules/s3-backend"
-  bucket_name = "lesson5-tfstate-bucket"
-  table_name  = "terraform-locks"
-}
+# module "s3_backend" {
+#   source          = "./modules/s3-backend"
+#   bucket_name     = "lesson5-tfstate-bucket"
+#   table_name      = "terraform-locks"
+#   region          = var.region
+#   project_prefix  = var.project_prefix
+# }
+
 
 module "vpc" {
   source             = "./modules/vpc"

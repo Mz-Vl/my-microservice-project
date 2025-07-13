@@ -1,0 +1,101 @@
+controller:
+  admin:
+    username: admin
+    password: admin123
+
+  serviceType: LoadBalancer
+  servicePort: 80
+  service:
+    port: 80
+    targetPort: 8080
+
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "512Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+
+  persistence:
+    enabled: true
+    storageClass: jenkins-ebs
+    size: 10Gi
+
+  installPlugins:
+    - kubernetes
+    - workflow-aggregator
+    - git
+    - configuration-as-code
+    - credentials-binding
+    - github
+    - docker-workflow
+    - docker-plugin
+    - job-dsl
+
+  serviceAccount:
+    name: jenkins-sa
+    create: false
+
+  jenkinsContainerEnv:
+    - name: github_user
+      valueFrom:
+        secretKeyRef:
+          name: github-secret
+          key: github_user
+    - name: github_pat
+      valueFrom:
+        secretKeyRef:
+          name: github-secret
+          key: github_pat
+
+  JCasC:
+    enabled: true
+    configScripts:
+      credentials: |
+        credentials:
+          system:
+            domainCredentials:
+              - credentials:
+                  - usernamePassword:
+                      scope: GLOBAL
+                      id: github-token
+                      username: ${github_user}
+                      password: ${github_pat}
+                      description: GitHub PAT
+      seed-job: |
+        jobs:
+          - script: >
+              job('seed-job') {
+                description('Job to generate pipeline for Django project')
+                scm {
+                  git {
+                    remote {
+                      url('https://github.com/Mz-Vl/infra.git')
+                      credentials('github-token')
+                    }
+                    branches('*/lesson-8-9')
+                  }
+                }
+                steps {
+                  dsl {
+                    text(''' 
+                      pipelineJob("goit-django-docker") {
+                        definition {
+                          cpsScm {
+                            scm {
+                              git {
+                                remote {
+                                  url("https://github.com/Mz-Vl/infra.git")
+                                  credentials("github-token")
+                                }
+                                branches("*/lesson-8-9")
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ''')
+                  }
+                }
+              }
