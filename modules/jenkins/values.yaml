@@ -10,47 +10,34 @@ controller:
     targetPort: 8080
 
   resources:
-    requests:
-      cpu: "250m"
-      memory: "512Mi"
     limits:
       cpu: "500m"
       memory: "1Gi"
+    requests:
+      cpu: "250m"
+      memory: "512Mi"
 
-  persistence:
+  persistentVolume:
     enabled: true
-    storageClass: jenkins-ebs
+    storageClass: ""
     size: 10Gi
 
   installPlugins:
-    - kubernetes
-    - workflow-aggregator
-    - git
-    - configuration-as-code
-    - credentials-binding
-    - github
-    - docker-workflow
-    - docker-plugin
-    - job-dsl
+    - kubernetes:latest
+    - workflow-aggregator:latest
+    - git:latest
+    - configuration-as-code:latest
+    - credentials-binding:latest
+    - github:latest
+    - docker-plugin:latest
+    - docker-workflow:latest
+    - job-dsl:latest
 
   serviceAccount:
     name: jenkins-sa
     create: false
 
-  jenkinsContainerEnv:
-    - name: github_user
-      valueFrom:
-        secretKeyRef:
-          name: github-secret
-          key: github_user
-    - name: github_pat
-      valueFrom:
-        secretKeyRef:
-          name: github-secret
-          key: github_pat
-
   JCasC:
-    enabled: true
     configScripts:
       credentials: |
         credentials:
@@ -71,7 +58,7 @@ controller:
                 scm {
                   git {
                     remote {
-                      url('https://github.com/Mz-Vl/infra.git')
+                      url('${github_repo_url}')
                       credentials('github-token')
                     }
                     branches('*/lesson-8-9')
@@ -79,14 +66,14 @@ controller:
                 }
                 steps {
                   dsl {
-                    text(''' 
+                    text('''
                       pipelineJob("goit-django-docker") {
                         definition {
                           cpsScm {
                             scm {
                               git {
                                 remote {
-                                  url("https://github.com/Mz-Vl/infra.git")
+                                  url("${github_repo_url}")
                                   credentials("github-token")
                                 }
                                 branches("*/lesson-8-9")

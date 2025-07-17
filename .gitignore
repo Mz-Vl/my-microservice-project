@@ -53,3 +53,11 @@ secrets.json
 *.swp
 *.bak
 *.tmp
+
+.env
+__pycache__
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfvars
+**/*.tfvars.json
+**/.terraform*

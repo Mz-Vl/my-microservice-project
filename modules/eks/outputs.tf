@@ -1,15 +1,22 @@
-output "cluster_name" {
-  value = aws_eks_cluster.this.name
+output "eks_cluster_endpoint" {
+  description = "EKS API endpoint for connecting to the cluster"
+  value       = aws_eks_cluster.eks.endpoint
 }
 
-output "endpoint" {
-  value = aws_eks_cluster.this.endpoint
+output "eks_cluster_name" {
+  description = "The EKS cluster name"
+  value       = aws_eks_cluster.eks.name
 }
 
-output "kubeconfig_certificate_authority_data" {
-  value = aws_eks_cluster.this.certificate_authority[0].data
+output "eks_node_role_arn" {
+  description = "IAM role ARN for the EKS Worker Nodes"
+  value       = aws_iam_role.nodes.arn
 }
 
-output "ebs_csi_driver_role" {
-  value = aws_iam_role.ebs_csi_driver_role.arn
+output "oidc_provider_arn" {
+  value = aws_iam_openid_connect_provider.oidc.arn
+}
+
+output "oidc_provider_url" {
+  value = aws_iam_openid_connect_provider.oidc.url
 }

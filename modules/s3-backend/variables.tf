@@ -1,19 +1,11 @@
 variable "bucket_name" {
-  description = "The name of the S3 bucket"
+  description = "The name of the S3 bucket for Terraform state"
   type        = string
+  default     = "sshevche-bucket"
 }
 
 variable "table_name" {
-  description = "The name of the DynamoDB table"
+  description = "The name of the DynamoDB table for Terraform locks"
   type        = string
-}
-
-variable "region" {
-  description = "Region for S3 and DynamoDB"
-  type        = string
-}
-
-variable "project_prefix" {
-  description = "Prefix for naming S3 bucket and DynamoDB table"
-  type        = string
+  default     = "sshevche-dynamodb"
 }

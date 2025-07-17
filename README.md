@@ -1,174 +1,190 @@
-📦 Lesson 7 — Django Kubernetes Deployment on AWS
-Цей проєкт розгортає Django-застосунок у кластері Kubernetes, створеному через Terraform, з використанням Helm-чарту та ECR.
+# 📦 Інфраструктура на Terraform для Django в Kubernetes на AWS
+
+Цей репозиторій містить конфігурацію для розгортання Django-застосунку в Kubernetes-кластері AWS EKS із використанням Terraform, Helm, Jenkins, Argo CD та інших сервісів AWS.
+
+## 📁 Структура проєкту
 
 ```plaintext
-lesson-8-9/
-├── backend.tf                 # Налаштування бекенду Terraform (S3 + DynamoDB)
-├── main.tf                    # Підключення модулів
-├── outputs.tf                 # Виводи ресурсів
-├── terraform.tfvars           # Значення змінних
-├── variables.tf               # Змінні
-├── jenkins-storageclass.yaml  # StorageClass для Jenkins
-├── ebs-csi-driver-policy.json # IAM policy для EBS CSI Driver
-
-modules/
-├── s3-backend/
-│   ├── s3.tf
-│   ├── dynamodb.tf
-│   ├── variables.tf
-│   └── outputs.tf
+Project/
 │
-├── vpc/
-│   ├── vpc.tf
-│   ├── routes.tf
-│   ├── variables.tf
-│   └── outputs.tf
+├── main.tf                        # Головний файл для підключення модулів
+├── backend.tf                     # Конфігурація бекенду для файлів стану (S3 + DynamoDB)
+├── outputs.tf                     # Глобальні виводи ресурсів
 │
-├── ecr/
-│   ├── ecr.tf
-│   ├── variables.tf
-│   └── outputs.tf
+├── modules/                       # Директорія з усіма модулями
+│   ├── s3-backend/                # Модуль для S3 та DynamoDB
+│   │   ├── s3.tf                  # Створення S3 bucket
+│   │   ├── dynamodb.tf            # Створення таблиці DynamoDB
+│   │   ├── variables.tf           # Змінні для S3
+│   │   └── outputs.tf             # Виводи для S3 та DynamoDB
+│   │
+│   ├── vpc/                       # Модуль для VPC
+│   │   ├── vpc.tf                 # Створення VPC, підмереж та Internet Gateway
+│   │   ├── routes.tf              # Конфігурація таблиці маршрутизації
+│   │   ├── variables.tf           # Змінні для VPC
+│   │   └── outputs.tf             # Виводи VPC
+│   │
+│   ├── ecr/                       # Модуль для ECR
+│   │   ├── ecr.tf                 # Створення ECR репозиторію
+│   │   ├── variables.tf           # Змінні для ECR
+│   │   └── outputs.tf             # Вивід URL репозиторію
+│   │
+│   ├── eks/                       # Модуль для кластера Kubernetes (EKS)
+│   │   ├── eks.tf                 # Створення EKS кластера
+│   │   ├── aws_ebs_csi_driver.tf  # Встановлення плагіна EBS CSI драйвера
+│   │   ├── variables.tf           # Змінні для EKS
+│   │   └── outputs.tf             # Виводи для EKS кластера
+│   │
+│   ├── jenkins/                   # Модуль для встановлення Jenkins через Helm
+│   │   ├── jenkins.tf             # Helm реліз для Jenkins
+│   │   ├── variables.tf           # Змінні (ресурси, облікові дані, значення)
+│   │   ├── providers.tf           # Визначення провайдерів
+│   │   ├── values.yaml            # Конфігурація Jenkins
+│   │   └── outputs.tf             # Виводи (URL, пароль адміністратора)
+│   │
+│   ├── rds/                       # Модуль RDS
+│   │   ├── rds.tf                 # Створення RDS бази даних
+│   │   ├── aurora.tf              # Створення кластера Aurora бази даних
+│   │   ├── shared.tf              # Спільні ресурси
+│   │   ├── variables.tf           # Змінні (ресурси, облікові дані, значення)
+│   │   └── outputs.tf             # Виводи RDS
+│   │
+│   └── argo_cd/                   # Модуль для встановлення Argo CD через Helm
+│       ├── argocd.tf              # Helm реліз для Argo CD
+│       ├── variables.tf           # Змінні (версія чарту, неймспейс, URL репо тощо)
+│       ├── providers.tf           # Провайдери Kubernetes + Helm
+│       ├── values.yaml            # Кастомна конфігурація Argo CD
+│       ├── outputs.tf             # Виводи (hostname, початковий пароль адміністратора)
+│       └── charts/                # Helm чарт для створення Argo CD застосунків
+│           ├── Chart.yaml         # Метадані чарту
+│           ├── values.yaml        # Список застосунків, репозиторіїв
+│           └── templates/
+│               ├── application.yaml    # Шаблон застосунку
+│               └── repository.yaml     # Шаблон репозиторію
 │
-├── eks/
-│   ├── eks.tf
-│   ├── aws_ebs_csi_driver.tf   # Драйвер EBS
-│   ├── variables.tf
-│   └── outputs.tf
-│
-├── jenkins/
-│   ├── jenkins.tf              # Helm release Jenkins
-│   ├── configmap.yaml          # Jenkins ConfigMap
-│   ├── values.yaml             # Jenkins values для Helm
-│   ├── providers.tf            # Kubernetes/Helm provider
-│   ├── variables.tf
-│   └── outputs.tf
-│
-└── argo_cd/
-    ├── argo_cd.tf              # Helm release Argo CD
-    ├── providers.tf            # (спільно з Jenkins або окремо)
-    ├── values.yaml             # Аргумент values для ArgoCD
-    ├── variables.tf
-    ├── outputs.tf
-    └── charts/
-        ├── Chart.yaml
-        ├── values.yaml         # Список apps, репозиторіїв
-        └── templates/
-            ├── application.yaml
-            └── repository.yaml
-
-charts/
-├── django-app/
-│   ├── Chart.yaml
-│   ├── values.yaml
-│   └── templates/
-│       ├── deployment.yaml
-│       ├── service.yaml
-│       ├── hpa.yaml
-│       ├── configmap.yaml
-│       └── django-ingress.yaml
-│
-└── jenkins/
-    ├── Chart.yaml
-    └── values.yaml
-
-docker-django/
-└── app/
-    ├── __init__.py
-    ├── asgi.py
-    ├── settings.py
-    ├── urls.py
-    └── wsgi.py
-
-k8s/
-└── ebs-storageclass.yaml       # Додаткові K8s YAML-маніфести (якщо треба)
+├── charts/                        # Директорія з Helm чартами
+│   └── django-app/                # Helm чарт для Django застосунку
+│       ├── templates/
+│       │   ├── deployment.yaml    # Розгортання Django
+│       │   ├── service.yaml       # Сервіс для Django
+│       │   ├── configmap.yaml     # Конфігураційна мапа
+│       │   └── hpa.yaml           # Горизонтальне автомасштабування
+│       ├── Chart.yaml             # Метадані чарту
+│       └── values.yaml            # ConfigMap зі змінними середовища
 ```
 
-README.md — документація проєкту
+## 🛠 Технології
 
-✅ Реалізовано
-⚙️ Terraform
-EKS кластер для Kubernetes
+- **Terraform** для керування інфраструктурою
+- **Docker + ECR** — контейнеризація Django-застосунку
+- **Helm** — деплой сервісів у кластер
+- **Jenkins** — CI/CD пайплайни
+- **Argo CD** — GitOps деплой додатків
+- **PostgreSQL / Aurora** — база даних (за вибором)
 
-ECR репозиторій
+## 🚀 Розгортання
 
-VPC + сабнети + Internet Gateway
+### 1. Ініціалізація S3/DynamoDB бекенду
 
-S3 bucket + DynamoDB для terraform.tfstate
-
-🐳 Docker + ECR
-Docker-образ Django
-
-Публікація образу до ECR
-
-📦 Helm
-Deployment + Service для Django
-
-ConfigMap для змінних оточення
-
-HPA (масштабування від 2 до 6)
-
-Ingress (ALB) для зовнішнього доступу
-
-🔧 Jenkins (CI/CD)
-Jenkins деплой через Helm-чарт
-
-Плагіни: git, job-dsl, github, docker-workflow, kubernetes, configuration-as-code
-
-Jenkins Configuration as Code (JCasC)
-
-Seed job для автоматичного створення пайплайну з GitHub-репозиторію
-
-Облікові дані GitHub зберігаються в Kubernetes Secret
-
-🚀 Деплой
-bash
-Copy
-Edit
-# Ініціалізація Terraform
+```bash
+cd modules/s3-backend
 terraform init
-
-# Перевірка
-terraform plan
-
-# Створення інфраструктури
 terraform apply
-bash
-Copy
-Edit
-# Збірка та пуш Docker-образу
-docker build -t <ecr-repo>:latest .
-docker push <ecr-repo>:latest
-bash
-Copy
-Edit
-# Деплой Django Helm-чарту
+```
+
+### 2. Розгортання всієї інфраструктури
+
+```bash
+cd ../../
+terraform init
+terraform plan
+terraform apply
+```
+
+### 3. Збірка Docker-образу та пуш в ECR
+
+```bash
+docker build -t <your-ecr-repo>:latest .
+docker push <your-ecr-repo>:latest
+```
+
+### 4. Деплой Django Helm-чарту
+
+```bash
 cd charts/django-app
 helm upgrade --install django-app .
+```
 
-# Деплой Jenkins
-cd modules/jenkins
-helm upgrade --install jenkins oci://registry-1.docker.io/bitnamicharts/jenkins -f values.yaml -n jenkins --create-namespace
-🔁 Перевірка CI/CD
-Зайти в Jenkins: http://<ALB-address>:80
+## 🧪 CI/CD з Jenkins
 
-Авторизуватись як admin / admin123
+1. **Отримай вихідні дані:**
+   ```bash
+   terraform output -module=jenkins
+   ```
 
-Seed job має з’явитись автоматично (JCasC)
+2. **Увійди в Jenkins** через ALB URL (`admin` / `admin123`)
 
-Перевірити, що створено goit-django-docker pipeline job
+3. **Seed job** створиться автоматично завдяки JCasC
 
-Запустити pipeline → автоматичне оновлення Helm деплою
+4. **Перевір**, що з'явився пайплайн `goit-django-docker`
 
-⚠️ Примітки
-ALLOWED_HOSTS має включати DNS-адресу ALB
+5. **Запусти** — він оновить Helm реліз автоматично
 
-DEBUG=False у production
+## 📦 Argo CD
 
-Secrets не пушаться у GitHub
+1. **Отримай URL та пароль:**
+   ```bash
+   terraform output -module=argo_cd
+   ```
 
-Для видалення ресурсів:
+2. **Відкрий Web UI** → Увійди як `admin`
 
-bash
-Copy
-Edit
-terraform destroy
+3. **Побачиш додаток** `django-app` → натисни **Sync**
+
+## 🧩 RDS (Aurora / стандарт)
+
+Модуль `rds` дозволяє обрати між Aurora та стандартною PostgreSQL:
+
+```hcl
+module "rds" {
+  source = "./modules/rds"
+  use_aurora = true
+  ...
+}
+```
+
+### Типи баз:
+
+| Параметр | Опис |
+|----------|------|
+| `use_aurora` | `true` → Aurora, `false` → стандарт |
+| `multi_az` | Висока доступність |
+| `engine_version` | Версія (наприклад `15.3` або `17.2`) |
+| `instance_class` | Розмір екземпляра RDS |
+
+## 📌 Корисні команди
+
+**Оновити kubectl:**
+```bash
+aws eks --region <region> update-kubeconfig --name <eks-cluster-name>
+```
+
+**Отримати пароль Argo CD:**
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d
+```
+
+## ❗ Примітки
+
+- `ALLOWED_HOSTS` має містити DNS ALB
+- `DEBUG` має бути `False` на проді
+- Secrets не комітяться у репозиторій
+- Для повного видалення:
+  ```bash
+  terraform destroy
+  ```
+
+---
+
+> **Увага:** Переконайтеся, що у вас встановлені всі необхідні залежності: `terraform`, `kubectl`, `helm`, `docker`, `aws-cli`
