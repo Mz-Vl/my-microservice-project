@@ -5,7 +5,7 @@ variable "region" {
 
 variable "cluster_name" {
   description = "Name of the EKS cluster"
-  default     = "sshe-eks-cluster"
+  default     = "app-eks-cluster"
 }
 
 variable "subnet_ids" {
@@ -15,7 +15,7 @@ variable "subnet_ids" {
 
 variable "node_group_name" {
   description = "Name of the node group"
-  default     = "sshe-node-group"
+  default     = "app-node-group"
 }
 
 variable "instance_type" {
