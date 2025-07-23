@@ -23,8 +23,9 @@ spec:
 
   environment {
     ECR_REGISTRY = "655840553229.dkr.ecr.us-east-1.amazonaws.com"
-    IMAGE_NAME   = "django-backend"
+    IMAGE_NAME   = "app"
     IMAGE_TAG    = "v1.0.${BUILD_NUMBER}"
+
 
   }
 

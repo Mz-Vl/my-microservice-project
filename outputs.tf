@@ -1,60 +1,60 @@
 # ─────────────── S3 & DynamoDB ───────────────
 output "s3_bucket_name" {
-  description = "Назва S3-бакета для зберігання стейтів"
+  description = "Name S3-bucket for save states"
   value       = module.s3_backend.s3_bucket_name
 }
 
 output "dynamodb_table_name" {
-  description = "Назва таблиці DynamoDB для блокування Terraform стейтів"
+  description = "Name DynamoDB for blocking Terraform states"
   value       = module.s3_backend.dynamodb_table_name
 }
 
 # ─────────────── VPC ───────────────
 output "vpc_id" {
-  description = "ID створеної VPC"
+  description = "ID created VPC"
   value       = module.vpc.vpc_id
 }
 
 output "public_subnet_ids" {
-  description = "Список ID публічних підмереж"
+  description = "List of ID for public subnets"
   value       = module.vpc.public_subnet_ids
 }
 
 # ─────────────── ECR ───────────────
 output "ecr_url" {
-  description = "URL ECR репозиторію"
+  description = "URL ECR repository"
   value       = module.ecr.repository_url
 }
 
 # ─────────────── EKS ───────────────
 output "eks_cluster_name" {
-  description = "Назва EKS кластера"
+  description = "Name of EKS cluster"
   value       = module.eks.eks_cluster_name
 }
 
 output "eks_cluster_endpoint" {
-  description = "EKS API endpoint для підключення до кластера"
+  description = "EKS API endpoint connection to cluster"
   value       = module.eks.eks_cluster_endpoint
 }
 
 output "eks_node_role_arn" {
-  description = "ARN ролі IAM для EKS воркерів"
+  description = "ARN roles IAM for EKS workers"
   value       = module.eks.eks_node_role_arn
 }
 
 output "ebs_csi_driver_role" {
-  description = "IAM роль для Amazon EBS CSI Driver"
+  description = "IAM role for Amazon EBS CSI Driver"
   value       = module.eks.ebs_csi_driver_role
 }
 
 # ─────────────── Jenkins ───────────────
 output "jenkins_release" {
-  description = "Назва Helm-релізу Jenkins"
+  description = "Name of Helm-release Jenkins"
   value       = module.jenkins.jenkins_release_name
 }
 
 output "jenkins_namespace" {
-  description = "Kubernetes namespace, в якому розгорнуто Jenkins"
+  description = "Kubernetes namespace, with Jenkins"
   value       = module.jenkins.jenkins_namespace
 }
 

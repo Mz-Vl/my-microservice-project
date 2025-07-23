@@ -1,4 +1,4 @@
-resource "aws_dynamodb_table" "sshevche-dynamodb" {
+resource "aws_dynamodb_table" "app-dynamodb" {
   name         = var.table_name
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"

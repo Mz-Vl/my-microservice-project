@@ -1,37 +1,32 @@
-replicaCount: 2
-
 image:
-  repository: 655840553229.dkr.ecr.eu-central-1.amazonaws.com/lesson-5-ecr
+  repository: 224751578050.dkr.ecr.us-east-1.amazonaws.com/sshevche-repo
   tag: latest
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
-  port: 80
-  targetPort: 8000
+  port: 8000
 
 ingress:
   enabled: false
 
-env:
-  DJANGO_SETTINGS_MODULE: app.settings
-  DEBUG: "False"
-  ALLOWED_HOSTS: "[\"k8s-default-djangoap-c0cbdff1ed-170475447.eu-central-1.elb.amazonaws.com\"]"
+config:
   POSTGRES_HOST: db
-  POSTGRES_PORT: "5432"
+  POSTGRES_PORT: 5432
   POSTGRES_USER: django_user
   POSTGRES_DB: django_db
-  POSTGRES_PASSWORD: pass2311vg
+  POSTGRES_PASSWORD: pass3254aa
 
-resources:
-  limits:
-    cpu: "500m"
-    memory: "512Mi"
-  requests:
-    cpu: "200m"
-    memory: "256Mi"
 
-autoscaling:
-  minReplicas: 2
-  maxReplicas: 6
-  targetCPUUtilizationPercentage: 70
+postgresql:
+  enabled: true
+  global:
+    postgresql:
+      auth:
+        postgresPassword: pass3254aa
+        username: django_user
+        database: django_db
+        password: pass3254aa
+  primary:
+    persistence:
+      size: 2Gi

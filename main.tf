@@ -4,8 +4,8 @@ provider "aws" {
 
 module "s3_backend" {
   source         = "./modules/s3-backend"
-  bucket_name    = "lesson5-tfstate-bucket"
-  table_name     = "terraform-locks"
+  bucket_name    = "app-bucket"
+  table_name     = "app-dynamodb"
   region         = var.region
   project_prefix = var.project_prefix
 }

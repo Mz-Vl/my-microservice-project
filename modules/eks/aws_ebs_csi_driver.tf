@@ -1,7 +1,7 @@
 resource "aws_iam_openid_connect_provider" "ebs_oidc" {
   url             = aws_eks_cluster.eks.identity[0].oidc[0].issuer
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = ["<REPLACE_WITH_YOUR_OWN_THUMBPRINT>"] # можна підставити через variable
+  thumbprint_list = ["7f3b02e22da0ecd6c6f9a9960b14926bb9e99a48"]
 }
 
 resource "aws_iam_role" "ebs_csi_driver_irsa_role" {
